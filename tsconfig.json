@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    // Type Checking
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+
+    // Modules
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    // Emit
+    "noEmit": true,
+
+    // Interop Constraints
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+
+    // Language and Environment
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "target": "ESNext",
+
+    // Projects
+    "incremental": true,
+
+    // Completeness
+    "skipLibCheck": true
+  }
+}

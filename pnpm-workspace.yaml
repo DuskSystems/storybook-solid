@@ -1,0 +1,5 @@
+packages:
+  - packages/storybook-solid
+  - packages/storybook-solid-vite
+  - examples/solid
+  - examples/react

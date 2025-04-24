@@ -1,0 +1,17 @@
+{
+  "name": "@dusksystems/storybook-solid-root",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm --recursive build",
+    "lint": "pnpm lint-biome",
+    "lint-biome": "biome check",
+    "typecheck": "pnpm --recursive typecheck",
+    "fix": "pnpm fix-biome",
+    "fix-biome": "biome check --write",
+    "test": "pnpm --recursive test",
+    "e2e": "pnpm fix && pnpm e2e-ci",
+    "e2e-ci": "pnpm build && pnpm typecheck && pnpm lint && pnpm test"
+  }
+}

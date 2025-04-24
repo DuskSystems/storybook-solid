@@ -1,0 +1,147 @@
+{
+  "remove_trailing_whitespace_on_save": true,
+  "ensure_final_newline_on_save": true,
+
+  "file_scan_exclusions": ["**/.git", "**/.direnv", "**/__screenshots__", "**/__snapshots__"],
+
+  "languages": {
+    "Nix": {
+      "language_servers": ["nixd", "nil"],
+      "format_on_save": "on",
+      "formatter": "language_server"
+    },
+
+    "JSON": {
+      "language_servers": ["json-language-server", "package-version-server"],
+      "format_on_save": "off"
+    },
+
+    "JSONC": {
+      "language_servers": ["json-language-server", "package-version-server"],
+      "format_on_save": "off"
+    },
+
+    // FIXME: Format on save once Biome v2 releases (and extension updates).
+
+    "HTML": {
+      "language_servers": ["biome", "vscode-html-language-server"],
+      "format_on_save": "off",
+      "formatter": "language_server"
+    },
+
+    "CSS": {
+      "language_servers": ["biome", "vscode-css-language-server"],
+      "format_on_save": "off",
+      "formatter": "language_server"
+    },
+
+    "JavaScript": {
+      "language_servers": ["biome", "vtsls"],
+      "format_on_save": "off",
+      "formatter": "language_server"
+    },
+
+    "TypeScript": {
+      "language_servers": ["biome", "vtsls"],
+      "format_on_save": "off",
+      "formatter": "language_server"
+    },
+
+    "TSX": {
+      "language_servers": ["biome", "vtsls"],
+      "format_on_save": "off",
+      "formatter": "language_server"
+    }
+  },
+
+  "lsp": {
+    "nixd": {
+      "binary": {
+        "path": "nixd"
+      },
+
+      "settings": {
+        "formatting": {
+          "command": ["nixfmt", "--width=120"]
+        }
+      }
+    },
+
+    "nil": {
+      "binary": {
+        "path": "nil"
+      }
+    },
+
+    "package-version-server": {
+      "binary": {
+        "path": "package-version-server"
+      }
+    },
+
+    "json-language-server": {
+      "binary": {
+        "path": "vscode-json-language-server",
+        "arguments": ["--stdio"]
+      }
+    },
+
+    "vscode-html-language-server": {
+      "binary": {
+        "path": "vscode-html-language-server",
+        "arguments": ["--stdio"]
+      },
+
+      "settings": {
+        "format": {
+          "enable": false
+        }
+      }
+    },
+
+    "vscode-css-language-server": {
+      "binary": {
+        "path": "vscode-css-language-server",
+        "arguments": ["--stdio"]
+      },
+
+      "settings": {
+        "format": {
+          "enable": false
+        }
+      }
+    },
+
+    "biome": {
+      "binary": {
+        "path": "biome",
+        "arguments": ["lsp-proxy"]
+      },
+
+      "settings": {
+        "require_config_file": true
+      }
+    },
+
+    "vtsls": {
+      "binary": {
+        "path": "vtsls",
+        "arguments": ["--stdio"]
+      },
+
+      "settings": {
+        "javascript": {
+          "format": {
+            "enable": false
+          }
+        },
+
+        "typescript": {
+          "format": {
+            "enable": false
+          }
+        }
+      }
+    }
+  }
+}

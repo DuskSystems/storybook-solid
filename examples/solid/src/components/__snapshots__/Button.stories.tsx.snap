@@ -1,0 +1,89 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Base > Base 1`] = `
+<button
+  class="storybook-button storybook-button--medium storybook-button--secondary"
+  type="button"
+>
+  foo
+</button>
+`;
+
+exports[`Hooks Story > HooksStory 1`] = `
+<input
+  data-testid="input"
+/>
+`;
+
+exports[`Input Field Filled > InputFieldFilled 1`] = `
+<input
+  data-testid="input"
+/>
+`;
+
+exports[`Loader Story > LoaderStory 1`] = `
+<div>
+  <div
+    data-testid="loaded-data"
+  >
+    loaded data
+  </div>
+  <div
+    data-testid="spy-data"
+  >
+    mockFn return value
+  </div>
+</div>
+`;
+
+exports[`Mount In Play Function > MountInPlayFunction 1`] = `
+<div>
+  <div
+    data-testid="loaded-data"
+  >
+    loaded data
+  </div>
+  <div
+    data-testid="spy-data"
+  >
+    mockFn return value
+  </div>
+</div>
+`;
+
+exports[`Primary > Primary 1`] = `
+<button
+  class="storybook-button storybook-button--large storybook-button--primary"
+  type="button"
+>
+  foo
+</button>
+`;
+
+exports[`With Action Arg > WithActionArg 1`] = `
+<button
+  type="button"
+/>
+`;
+
+exports[`With Action Arg Type > WithActionArgType 1`] = `
+<div>
+  nothing
+</div>
+`;
+
+exports[`With Render > WithRender 1`] = `
+<div>
+  <p
+    data-testid="custom-render"
+  >
+    I am a custom render function
+  </p>
+  <button
+    class="storybook-button storybook-button--medium storybook-button--secondary"
+    type="button"
+  >
+    foo
+  </button>
+</div>
+`;

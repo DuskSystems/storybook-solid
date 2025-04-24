@@ -1,0 +1,20 @@
+# Nix
+result
+result-*
+
+# Dir Env
+.direnv
+
+# JavaScript
+dist
+node_modules
+
+# TypeScript
+tsconfig.tsbuildinfo
+
+# Storybook
+storybook-static
+storybook.log
+
+# Istanbul
+coverage

@@ -1,0 +1,61 @@
+{
+  "name": "@dusksystems/storybook-solid",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./preview": {
+      "types": "./dist/preview.d.ts",
+      "import": "./dist/preview.mjs",
+      "require": "./dist/preview.js"
+    },
+    "./preset": "./preset.js",
+    "./dist/entry-preview.mjs": "./dist/entry-preview.mjs",
+    "./dist/entry-preview-docs.mjs": "./dist/entry-preview-docs.mjs",
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "!src",
+    "README.md",
+    "preset.js"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "watch": "tsdown --watch",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@babel/standalone": "7.27.1",
+    "@storybook/global": "5.0.0",
+    "@storybook/react": "9.0.0-beta.10",
+    "async-mutex": "0.5.0",
+    "prettier": "3.5.3",
+    "type-fest": "4.40.1"
+  },
+  "devDependencies": {
+    "@types/babel__standalone": "7.1.9",
+    "@types/node": "22.15.3",
+    "storybook": "9.0.0-beta.10",
+    "tsdown": "0.11.0-beta.3",
+    "typescript": "5.8.3",
+    "vite-plugin-solid": "2.11.6"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.9.0",
+    "storybook": "^9.0.0-0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
