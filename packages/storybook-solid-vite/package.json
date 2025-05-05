@@ -51,9 +51,9 @@
     "@storybook/builder-vite": "9.0.0-beta.10"
   },
   "devDependencies": {
-    "@types/node": "22.15.3",
+    "@types/node": "22.15.12",
     "storybook": "9.0.0-beta.10",
-    "tsdown": "0.11.0-beta.3",
+    "tsdown": "0.11.0",
     "typescript": "5.8.3",
     "vite-plugin-solid": "2.11.6"
   },

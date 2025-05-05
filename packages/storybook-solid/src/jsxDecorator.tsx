@@ -1,18 +1,15 @@
-import * as Babel from "@babel/standalone";
-import prettierPluginBabel from "prettier/plugins/babel";
-import prettierPluginEstree from "prettier/plugins/estree";
-import { format } from "prettier/standalone";
+import * as recast from "recast";
 import { SNIPPET_RENDERED, SourceType } from "storybook/internal/docs-tools";
 import type { PartialStoryFn, StoryContext } from "storybook/internal/types";
 import { addons, useEffect } from "storybook/preview-api";
 import type { SolidRenderer } from "./types";
 
-const t = Babel.packages.types;
-const generate = Babel.packages.generator.default;
+const t = recast.types.builders;
 
-type JSXAttribute = ReturnType<typeof t.jsxAttribute>;
-type JSXExpressionContainer = ReturnType<typeof t.jsxExpressionContainer>;
-type JSXText = ReturnType<typeof t.jsxText>;
+type JSXAttribute = recast.types.namedTypes.JSXAttribute;
+type JSXElement = recast.types.namedTypes.JSXElement;
+type JSXExpressionContainer = recast.types.namedTypes.JSXExpressionContainer;
+type JSXText = recast.types.namedTypes.JSXText;
 
 // NOTE: Copied from React integration.
 function skipSourceRender(context: StoryContext<SolidRenderer>): boolean {
@@ -62,35 +59,25 @@ export async function generateSolidSource(
   attributes: Record<string, unknown>,
   children: unknown,
 ): Promise<string> {
-  const opening = t.jsxOpeningElement(t.jsxIdentifier(name), createJSXAttributes(attributes), !children);
+  const element = createJSXElement(name, attributes, children);
+  const { code } = recast.print(element);
+  return code;
+}
 
-  const element = t.jsxElement(
-    opening,
-    children ? t.jsxClosingElement(t.jsxIdentifier(name)) : null,
-    createJSXChildren(children),
-    !children,
+function createJSXElement(name: string, attributes: Record<string, unknown>, children: unknown): JSXElement {
+  const jsxAttributes = createJSXAttributes(attributes);
+  const jsxChildren = createJSXChildren(children);
+  const hasChildren = jsxChildren.length > 0;
+
+  return t.jsxElement(
+    t.jsxOpeningElement(t.jsxIdentifier(name), jsxAttributes, !hasChildren),
+    hasChildren ? t.jsxClosingElement(t.jsxIdentifier(name)) : null,
+    jsxChildren,
   );
-
-  const { code } = generate(element);
-
-  // TODO: Switch to `biome` once `tsdown` supports top-level await for CJS?
-  let formatted = await format(code, {
-    parser: "babel",
-    plugins: [prettierPluginBabel, prettierPluginEstree],
-    printWidth: 120,
-    singleAttributePerLine: true,
-  });
-
-  formatted = formatted.trim();
-  if (formatted.endsWith(";")) {
-    return formatted.slice(0, -1);
-  }
-
-  return formatted;
 }
 
 function createJSXAttributes(attributes: Record<string, unknown>): JSXAttribute[] {
-  const result: JSXAttribute[] = [];
+  const result = [];
 
   const sorted = Object.entries(attributes).sort(([a], [b]) => a.localeCompare(b));
   for (const [key, value] of sorted) {
@@ -131,10 +118,11 @@ function createSingleAttribute(key: string, value: unknown): JSXAttribute | null
     );
   }
 
-  return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.valueToNode(value)));
+  console.warn(`Skipping attribute "${key}" with unsupported value type: ${typeof value} ${value}`);
+  return null;
 }
 
-function createJSXChildren(children: unknown): Array<JSXText | JSXExpressionContainer> {
+function createJSXChildren(children: unknown): (JSXText | JSXExpressionContainer)[] {
   if (!children) {
     return [];
   }
@@ -144,18 +132,19 @@ function createJSXChildren(children: unknown): Array<JSXText | JSXExpressionCont
   }
 
   if (Array.isArray(children)) {
-    const result: Array<JSXText | JSXExpressionContainer> = [];
+    const result = [];
 
     for (const child of children) {
       if (typeof child === "string") {
         result.push(t.jsxText(child));
       } else {
-        result.push(t.jsxExpressionContainer(t.valueToNode(child)));
+        result.push(t.jsxExpressionContainer(child));
       }
     }
 
     return result;
   }
 
-  return [t.jsxExpressionContainer(t.valueToNode(children))];
+  console.warn(`Skipping children with unsupported value type: ${typeof children} ${children}`);
+  return [];
 }
