@@ -2,6 +2,16 @@
   "name": "@dusksystems/storybook-solid",
   "version": "0.1.0",
   "license": "MIT",
+  "keywords": [
+    "storybook",
+    "solid",
+    "solidjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DuskSystems/storybook-solid.git",
+    "directory": "packages/storybook-solid"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
