@@ -1,7 +1,7 @@
 import * as recast from "recast";
 import { SNIPPET_RENDERED, SourceType } from "storybook/internal/docs-tools";
-import type { PartialStoryFn, StoryContext } from "storybook/internal/types";
-import { addons, useEffect } from "storybook/preview-api";
+import type { Args, PartialStoryFn, StoryContext } from "storybook/internal/types";
+import { addons, useEffect, useRef } from "storybook/preview-api";
 import type { SolidRenderer } from "./types";
 
 const t = recast.types.builders;
@@ -25,6 +25,7 @@ function skipSourceRender(context: StoryContext<SolidRenderer>): boolean {
 
 // TODO: Add formatting of render functions, see: `Hooks Story` in examples.
 export const jsxDecorator = (storyFn: PartialStoryFn<SolidRenderer>, context: StoryContext<SolidRenderer>) => {
+  const jsx = useRef<string | null>(null);
   const story = storyFn();
   const channel = addons.getChannel();
 
@@ -33,32 +34,39 @@ export const jsxDecorator = (storyFn: PartialStoryFn<SolidRenderer>, context: St
     return story;
   }
 
-  const name = context.component?.name.replace("[solid-refresh]", "");
-  if (!name) {
-    console.error("Missing name");
-    return story;
-  }
-
-  const { children, ...attributes } = context.args;
-
   useEffect(() => {
-    generateSolidSource(name, attributes, children).then((source) => {
-      channel.emit(SNIPPET_RENDERED, {
-        id: context.id,
-        args: context.unmappedArgs,
-        source,
-      });
-    });
+    const name = context.component?.name?.replace("[solid-refresh]", "");
+    if (!name) {
+      return;
+    }
+
+    const emitSource = (args: Args) => {
+      const { children, ...attributes } = args;
+      const source = generateSolidSource(name, attributes, children);
+
+      if (source && source !== jsx.current) {
+        jsx.current = source;
+        channel.emit(SNIPPET_RENDERED, {
+          id: context.id,
+          args,
+          source,
+        });
+      }
+    };
+
+    emitSource(context.args);
+    const onArgsUpdate = ({ args }: { args: Args }) => emitSource(args);
+
+    channel.on("storyArgsUpdated", onArgsUpdate);
+    return () => {
+      channel.off("storyArgsUpdated", onArgsUpdate);
+    };
   });
 
   return story;
 };
 
-export async function generateSolidSource(
-  name: string,
-  attributes: Record<string, unknown>,
-  children: unknown,
-): Promise<string> {
+export function generateSolidSource(name: string, attributes: Record<string, unknown>, children: unknown): string {
   const element = createJSXElement(name, attributes, children);
   const { code } = recast.print(element);
   return code;

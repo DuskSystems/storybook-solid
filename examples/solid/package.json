@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "dev": "storybook dev -p 6006",
+    "dev": "storybook dev --no-open --port 6006",
     "build": "pnpm build-library && pnpm build-storybook",
     "build-library": "vite build",
     "build-storybook": "storybook build",
