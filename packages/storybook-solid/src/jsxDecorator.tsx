@@ -112,7 +112,7 @@ function createSingleAttribute(key: string, value: unknown): JSXAttribute | null
       return t.jsxAttribute(t.jsxIdentifier(key), null);
     }
 
-    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.booleanLiteral(false)));
+    return null;
   }
 
   if (value === null || value === undefined) {
