@@ -1,4 +1,5 @@
 import * as recast from "recast";
+import type { Component } from "solid-js";
 import { SNIPPET_RENDERED, SourceType } from "storybook/internal/docs-tools";
 import type { Args, PartialStoryFn, StoryContext } from "storybook/internal/types";
 import { addons, useEffect, useRef } from "storybook/preview-api";
@@ -35,15 +36,11 @@ export const jsxDecorator = (storyFn: PartialStoryFn<SolidRenderer>, context: St
   }
 
   useEffect(() => {
-    const name = context.component?.name?.replace("[solid-refresh]", "");
-    if (!name) {
-      return;
-    }
-
     const emitSource = (args: Args) => {
+      const name = extractComponentName(context.component);
       const { children, ...attributes } = args;
-      const source = generateSolidSource(name, attributes, children);
 
+      const source = generateSolidSource(name, attributes, children);
       if (source && source !== jsx.current) {
         jsx.current = source;
         channel.emit(SNIPPET_RENDERED, {
@@ -66,7 +63,23 @@ export const jsxDecorator = (storyFn: PartialStoryFn<SolidRenderer>, context: St
   return story;
 };
 
-export function generateSolidSource(name: string, attributes: Record<string, unknown>, children: unknown): string {
+function extractComponentName(component: Component | undefined): string {
+  const name = component?.name?.replace("[solid-refresh]", "") || null;
+  if (name && name !== "C") {
+    return name;
+  }
+
+  // biome-ignore lint/suspicious/noExplicitAny: Best effort.
+  const displayName = (component as any).displayName;
+  if (typeof displayName === "string") {
+    return displayName;
+  }
+
+  console.warn("Failed to extract component name: ", component);
+  return "Component";
+}
+
+function generateSolidSource(name: string, attributes: Record<string, unknown>, children: unknown): string {
   const element = createJSXElement(name, attributes, children);
   const { code } = recast.print(element);
   return code;

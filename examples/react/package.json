@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "storybook dev --no-open --port 5005",
+    "serve": "http-server storybook-static",
     "build": "pnpm build-library && pnpm build-storybook",
     "build-library": "vite build",
     "build-storybook": "storybook build",
