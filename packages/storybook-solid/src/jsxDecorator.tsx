@@ -1,5 +1,9 @@
+import prettierPluginBabel from "prettier/plugins/babel";
+import prettierPluginEstree from "prettier/plugins/estree";
+import { format } from "prettier/standalone";
 import * as recast from "recast";
 import type { Component } from "solid-js";
+import { logger } from "storybook/internal/client-logger";
 import { SNIPPET_RENDERED, SourceType } from "storybook/internal/docs-tools";
 import type { Args, PartialStoryFn, StoryContext } from "storybook/internal/types";
 import { addons, useEffect, useRef } from "storybook/preview-api";
@@ -24,31 +28,29 @@ function skipSourceRender(context: StoryContext<SolidRenderer>): boolean {
   return !isArgsStory || sourceParams?.code || sourceParams?.type === SourceType.CODE;
 }
 
-// TODO: Add formatting of render functions, see: `Hooks Story` in examples.
 export const jsxDecorator = (storyFn: PartialStoryFn<SolidRenderer>, context: StoryContext<SolidRenderer>) => {
   const jsx = useRef<string | null>(null);
   const story = storyFn();
   const channel = addons.getChannel();
 
   const skip = skipSourceRender(context);
-  if (skip) {
-    return story;
-  }
 
   useEffect(() => {
-    const emitSource = (args: Args) => {
-      const name = extractComponentName(context.component);
-      const { children, ...attributes } = args;
+    if (skip) {
+      return;
+    }
 
-      const source = generateSolidSource(name, attributes, children);
-      if (source && source !== jsx.current) {
-        jsx.current = source;
-        channel.emit(SNIPPET_RENDERED, {
-          id: context.id,
-          args,
-          source,
-        });
-      }
+    const emitSource = (args: Args) => {
+      generateSolidSource(context, args).then((source) => {
+        if (source && source !== jsx.current) {
+          jsx.current = source;
+          channel.emit(SNIPPET_RENDERED, {
+            id: context.id,
+            args,
+            source,
+          });
+        }
+      });
     };
 
     emitSource(context.args);
@@ -63,6 +65,23 @@ export const jsxDecorator = (storyFn: PartialStoryFn<SolidRenderer>, context: St
   return story;
 };
 
+async function generateSolidSource(context: StoryContext<SolidRenderer>, args: Args): Promise<string> {
+  const name = extractComponentName(context.component);
+  const { children, ...attributes } = args;
+
+  const element = createJSXElement(name, attributes, children);
+  const { code } = recast.print(element);
+
+  const formatted = await format(code, {
+    parser: "babel",
+    plugins: [prettierPluginBabel, prettierPluginEstree],
+    printWidth: 120,
+    singleAttributePerLine: true,
+  });
+
+  return formatted.trim().replace(/;$/, "");
+}
+
 function extractComponentName(component: Component | undefined): string {
   const name = component?.name?.replace("[solid-refresh]", "") || null;
   if (name && name !== "C") {
@@ -75,14 +94,8 @@ function extractComponentName(component: Component | undefined): string {
     return displayName;
   }
 
-  console.warn("Failed to extract component name: ", component);
+  logger.warn("Failed to extract component name: ", component);
   return "Component";
-}
-
-function generateSolidSource(name: string, attributes: Record<string, unknown>, children: unknown): string {
-  const element = createJSXElement(name, attributes, children);
-  const { code } = recast.print(element);
-  return code;
 }
 
 function createJSXElement(name: string, attributes: Record<string, unknown>, children: unknown): JSXElement {
@@ -139,7 +152,7 @@ function createSingleAttribute(key: string, value: unknown): JSXAttribute | null
     );
   }
 
-  console.warn(`Skipping attribute "${key}" with unsupported value type: ${typeof value} ${value}`);
+  logger.warn(`Skipping attribute "${key}" with unsupported value type: ${typeof value} ${value}`);
   return null;
 }
 
@@ -166,6 +179,6 @@ function createJSXChildren(children: unknown): (JSXText | JSXExpressionContainer
     return result;
   }
 
-  console.warn(`Skipping children with unsupported value type: ${typeof children} ${children}`);
+  logger.warn(`Skipping children with unsupported value type: ${typeof children} ${children}`);
   return [];
 }
