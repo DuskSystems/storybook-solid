@@ -67,6 +67,7 @@
             biome
             vscode-langservers-extracted
             package-version-server
+            http-server
 
             # Nix
             nix-update
