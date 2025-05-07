@@ -10,7 +10,7 @@
     "build-library": "vite build",
     "build-storybook": "storybook build",
     "typecheck": "tsc",
-    "test": "vitest --run --coverage",
+    "test": "vitest --run --coverage --update",
     "test-watch": "vitest --ui"
   },
   "imports": {
