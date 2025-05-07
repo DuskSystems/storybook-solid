@@ -61,7 +61,7 @@
 
           buildInputs = with pkgs; [
             # Node
-            nodejs_23
+            nodejs_24
             pnpm_10
             vtsls
             biome

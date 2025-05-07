@@ -1,7 +1,7 @@
+import * as Babel from "@babel/standalone";
 import prettierPluginBabel from "prettier/plugins/babel";
 import prettierPluginEstree from "prettier/plugins/estree";
 import { format } from "prettier/standalone";
-import * as recast from "recast";
 import type { Component } from "solid-js";
 import { logger } from "storybook/internal/client-logger";
 import { SNIPPET_RENDERED, SourceType } from "storybook/internal/docs-tools";
@@ -9,12 +9,13 @@ import type { Args, PartialStoryFn, StoryContext } from "storybook/internal/type
 import { addons, useEffect, useRef } from "storybook/preview-api";
 import type { SolidRenderer } from "./types";
 
-const t = recast.types.builders;
+const t = Babel.packages.types;
+const generate = Babel.packages.generator.default;
 
-type JSXAttribute = recast.types.namedTypes.JSXAttribute;
-type JSXElement = recast.types.namedTypes.JSXElement;
-type JSXExpressionContainer = recast.types.namedTypes.JSXExpressionContainer;
-type JSXText = recast.types.namedTypes.JSXText;
+type JSXAttribute = ReturnType<typeof t.jsxAttribute>;
+type JSXElement = ReturnType<typeof t.jsxElement>;
+type JSXExpressionContainer = ReturnType<typeof t.jsxExpressionContainer>;
+type JSXText = ReturnType<typeof t.jsxText>;
 
 // NOTE: Copied from React integration.
 function skipSourceRender(context: StoryContext<SolidRenderer>): boolean {
@@ -70,7 +71,7 @@ async function generateSolidSource(context: StoryContext<SolidRenderer>, args: A
   const { children, ...attributes } = args;
 
   const element = createJSXElement(name, attributes, children);
-  const { code } = recast.print(element);
+  const { code } = generate(element);
 
   const formatted = await format(code, {
     parser: "babel",

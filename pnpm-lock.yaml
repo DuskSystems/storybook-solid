@@ -111,6 +111,9 @@ importers:
 
   packages/storybook-solid:
     dependencies:
+      '@babel/standalone':
+        specifier: 7.27.2
+        version: 7.27.2
       '@storybook/global':
         specifier: 5.0.0
         version: 5.0.0
@@ -120,9 +123,6 @@ importers:
       prettier:
         specifier: 3.5.3
         version: 3.5.3
-      recast:
-        specifier: 0.23.11
-        version: 0.23.11
       solid-js:
         specifier: ^1.9.0
         version: 1.9.6
@@ -130,6 +130,9 @@ importers:
         specifier: 4.41.0
         version: 4.41.0
     devDependencies:
+      '@types/babel__standalone':
+        specifier: 7.1.9
+        version: 7.1.9
       '@types/node':
         specifier: 22.15.14
         version: 22.15.14
@@ -137,8 +140,8 @@ importers:
         specifier: 9.0.0-beta.10
         version: 9.0.0-beta.10(@testing-library/dom@10.4.0)(prettier@3.5.3)
       tsdown:
-        specifier: 0.11.0
-        version: 0.11.0(typescript@5.8.3)
+        specifier: 0.11.1
+        version: 0.11.1(typescript@5.8.3)
       typescript:
         specifier: 5.8.3
         version: 5.8.3
@@ -168,8 +171,8 @@ importers:
         specifier: 9.0.0-beta.10
         version: 9.0.0-beta.10(@testing-library/dom@10.4.0)(prettier@3.5.3)
       tsdown:
-        specifier: 0.11.0
-        version: 0.11.0(typescript@5.8.3)
+        specifier: 0.11.1
+        version: 0.11.1(typescript@5.8.3)
       typescript:
         specifier: 5.8.3
         version: 5.8.3
@@ -265,6 +268,10 @@ packages:
 
   '@babel/runtime@7.27.1':
     resolution: {integrity: sha512-1x3D2xEk2fRo3PAhwQwu5UubzgiVWSXTBfWpVd2Mx2AzRqJuDJCsgaDVZ7HB5iGzDW1Hl1sWN2mFyKjmR9uAog==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/standalone@7.27.2':
+    resolution: {integrity: sha512-fO5toB6PVy7WFfAtXScY1xzwbTOgzxNw+eIiYpjPy9dNeTVscu59fX68JBz+iOZ/ZHsVBjQa4y7yent7eTDgXg==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.27.2':
@@ -833,6 +840,9 @@ packages:
 
   '@types/babel__generator@7.27.0':
     resolution: {integrity: sha512-ufFd2Xi92OAVPYsy+P4n7/U7e68fex0+Ee8gSG9KX7eo084CWiQ4sdxktvdl0bOPupXtVJPY19zk6EwWqUQ8lg==}
+
+  '@types/babel__standalone@7.1.9':
+    resolution: {integrity: sha512-IcCNPLqpevUD7UpV8QB0uwQPOyoOKACFf0YtYWRHcmxcakaje4Q7dbG2+jMqxw/I8Zk0NHvEps66WwS7z/UaaA==}
 
   '@types/babel__template@7.4.4':
     resolution: {integrity: sha512-h/NUaSyG5EyxBIp8YRxo4RMe2/qQgvyowRwVMzhYhBCONbW8PUsg4lkFMrhgZhUe5z3L3MiLDuvyJ/CaPa2A8A==}
@@ -1667,8 +1677,8 @@ packages:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
 
-  tsdown@0.11.0:
-    resolution: {integrity: sha512-WU3ZVksLk/9JIiSYuH0sR7iNwo/dZQoYxc3ri75CjFv8cj2M735Xstj44x2TMgZGHA1uii9mI55Ja/NpDVHAAQ==}
+  tsdown@0.11.1:
+    resolution: {integrity: sha512-VtooVG/dMeIddux3AG5fYatl9WEAS42A+pQVuHWrE3doGo1ZW9A57gT477x/hL7jxkq52srv3zKyrp2hyFdDng==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
@@ -1951,6 +1961,8 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
 
   '@babel/runtime@7.27.1': {}
+
+  '@babel/standalone@7.27.2': {}
 
   '@babel/template@7.27.2':
     dependencies:
@@ -2410,6 +2422,15 @@ snapshots:
   '@types/babel__generator@7.27.0':
     dependencies:
       '@babel/types': 7.27.1
+
+  '@types/babel__standalone@7.1.9':
+    dependencies:
+      '@babel/parser': 7.27.2
+      '@babel/types': 7.27.1
+      '@types/babel__core': 7.20.5
+      '@types/babel__generator': 7.27.0
+      '@types/babel__template': 7.4.4
+      '@types/babel__traverse': 7.20.7
 
   '@types/babel__template@7.4.4':
     dependencies:
@@ -3278,7 +3299,7 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tsdown@0.11.0(typescript@5.8.3):
+  tsdown@0.11.1(typescript@5.8.3):
     dependencies:
       ansis: 3.17.0
       cac: 6.7.14

@@ -7,7 +7,7 @@ export default defineConfig([
     entry: ["src/index.ts", "src/preset.ts", "src/preview.tsx", "src/entry-preview.tsx", "src/entry-preview-docs.tsx"],
     format: ["esm", "cjs"],
     platform: "browser",
-    noExternal: ["recast"],
+    noExternal: ["@babel/standalone"],
     // @ts-expect-error: Vite plugins not yet supported.
     plugins: [NodeProtocolPlugin(), solid()],
   },

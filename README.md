@@ -11,7 +11,7 @@ A forward-looking [SolidJS](https://www.solidjs.com) integration for [Storybook]
 ## Features
 
 - Reactivity decorator for fine-grained updates of controlled state.
-- Naive JSX source decorator powered by `recast`.
+- Naive JSX source decorator powered by `babel`.
 - Documentation powered by `react-docgen-typescript`.
 
 ## Caveats
