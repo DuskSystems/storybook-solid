@@ -1,10 +1,23 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`All Attributes > AllAttributes 1`] = `
+exports[`Example > Example 1`] = `
 <div>
   <pre>
     {"string":"hello","number":42,"boolTrue":true,"boolFalse":false,"nil":null,"array":[1,2,3],"nested":["nested",["array",456]],"object":{"foo":"bar","baz":false},"complex":{"bar":123,"foo":["array",456]},"element":{}}
   </pre>
-  <div />
+  <div>
+    text
+    123
+    nested
+    array
+    456
+    <div>
+      Hello
+    </div>
+    <span>
+      World
+    </span>
+    Show
+  </div>
 </div>
 `;

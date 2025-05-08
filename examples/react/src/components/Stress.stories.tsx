@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import preview from "#.storybook/preview";
 import { Stress } from "./Stress";
 
@@ -8,7 +9,7 @@ const meta = preview.meta({
   tags: ["autodocs"],
 });
 
-export const AllAttributes = meta.story({
+export const Example = meta.story({
   args: {
     string: "hello",
     number: 42,
@@ -25,5 +26,19 @@ export const AllAttributes = meta.story({
     arrow: (x: number) => x * 2,
     element: <div>Hi</div>,
     symbol: Symbol("foo"),
+    children: [
+      "text",
+      123,
+      true,
+      false,
+      null,
+      ["nested", ["array", 456]],
+      // { foo: "bar" },
+      <div>Hello</div>,
+      <span>World</span>,
+      // () => <em>JSX from function</em>,
+      // () => 99,
+      <Suspense>Suspense</Suspense>,
+    ],
   },
 });

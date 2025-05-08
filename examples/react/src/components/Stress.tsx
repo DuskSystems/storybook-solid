@@ -20,7 +20,7 @@ export interface StressProps {
   arrow: (x: number) => number;
   element: ReactNode;
   symbol: symbol;
-  children?: ReactNode | ReactNode[];
+  children: ReactNode;
 }
 
 export const Stress = ({
