@@ -54,7 +54,7 @@ function createJSXAttributes(attributes: Record<string, unknown>) {
 
 function createSingleAttribute(key: string, value: unknown) {
   if (value === null) {
-    return null;
+    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.nullLiteral()));
   }
 
   if (Array.isArray(value)) {
@@ -70,7 +70,11 @@ function createSingleAttribute(key: string, value: unknown) {
     }
 
     case "symbol": {
-      return t.jsxAttribute(t.jsxIdentifier(key), t.stringLiteral(value.toString()));
+      const expression = value.description
+        ? t.callExpression(t.identifier("Symbol"), [t.stringLiteral(value.description)])
+        : t.callExpression(t.identifier("Symbol"), []);
+
+      return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(expression));
     }
 
     case "string": {

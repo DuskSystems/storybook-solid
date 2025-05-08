@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`All Attributes > AllAttributes 1`] = `
+<div>
+  <div>
+    <div>
+      Hi
+    </div>
+  </div>
+  <pre>
+    {"string":"hello","number":42,"boolTrue":true,"boolFalse":false,"nil":null,"array":[1,2,3],"nested":["nested",["array",456]],"object":{"foo":"bar","baz":false},"complex":{"bar":123,"foo":["array",456]}}
+  </pre>
+</div>
+`;

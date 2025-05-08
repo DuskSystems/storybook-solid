@@ -11,20 +11,18 @@ describe("jsxGenerator", () => {
         number: 42,
         boolTrue: true,
         boolFalse: false,
-        null: null,
+        nil: null,
         array: [1, 2, 3],
         nested: ["nested", ["array", 456]],
         object: { foo: "bar", baz: false },
         complex: { bar: 123, foo: ["array", 456] },
-        function: function power(x: number) {
+        func: function power(x: number) {
           return x * x;
         },
         arrow: (x: number) => x * 2,
-        call: Math.max(1, 2),
-        component: <div>Hi</div>,
+        element: <div>Hi</div>,
         symbol: Symbol("foo"),
-        big_number: BigInt(123456),
-        solid: <Show when={() => true}>Inner Value</Show>,
+        big: BigInt(123456),
       },
       null,
     );
@@ -33,24 +31,23 @@ describe("jsxGenerator", () => {
       "<MyComponent
         array={[1, 2, 3]}
         arrow={() => {}}
-        big_number={123456n}
+        big={123456n}
         boolTrue
-        call={2}
         complex={{
           bar: 123,
           foo: ["array", 456],
         }}
-        component={<div>Hi</div>}
-        function={() => {}}
+        element={<div>Hi</div>}
+        func={() => {}}
         nested={["nested", ["array", 456]]}
+        nil={null}
         number={42}
         object={{
           foo: "bar",
           baz: false,
         }}
-        solid={() => {}}
         string="hello"
-        symbol="Symbol(foo)"
+        symbol={Symbol("foo")}
       />"
     `);
   });

@@ -59,6 +59,8 @@ export const jsxDecorator = (storyFn: PartialStoryFn<SolidRenderer>, context: St
 };
 
 function extractComponentName(component: Component | undefined): string {
+  console.log("Component: ", component);
+
   const name = component?.name?.replace("[solid-refresh]", "") || null;
   if (name && name !== "C") {
     return name;
