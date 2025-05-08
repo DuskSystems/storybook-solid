@@ -15,6 +15,10 @@ function skipSourceRender(context: StoryContext<SolidRenderer>): boolean {
     return false;
   }
 
+  if (sourceParams?.originalSource?.includes("render:")) {
+    return true;
+  }
+
   return !isArgsStory || sourceParams?.code || sourceParams?.type === SourceType.CODE;
 }
 

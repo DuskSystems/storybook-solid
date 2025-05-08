@@ -20,13 +20,12 @@ export interface StressProps {
   arrow: (x: number) => number;
   element: JSX.Element;
   symbol: symbol;
+  children?: JSX.Element | JSX.Element[];
 }
 
 export const Stress = (props: StressProps) => {
   return (
     <div>
-      <div>{props.element}</div>
-
       <pre>
         {JSON.stringify({
           string: props.string,
@@ -40,9 +39,12 @@ export const Stress = (props: StressProps) => {
           complex: props.complex,
           func: props.func,
           arrow: props.arrow,
+          element: props.element,
           symbol: props.symbol,
         })}
       </pre>
+
+      <div>{props.children}</div>
     </div>
   );
 };

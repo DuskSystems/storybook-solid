@@ -2,13 +2,9 @@
 
 exports[`All Attributes > AllAttributes 1`] = `
 <div>
-  <div>
-    <div>
-      Hi
-    </div>
-  </div>
   <pre>
-    {"string":"hello","number":42,"boolTrue":true,"boolFalse":false,"nil":null,"array":[1,2,3],"nested":["nested",["array",456]],"object":{"foo":"bar","baz":false},"complex":{"bar":123,"foo":["array",456]}}
+    {"string":"hello","number":42,"boolTrue":true,"boolFalse":false,"nil":null,"array":[1,2,3],"nested":["nested",["array",456]],"object":{"foo":"bar","baz":false},"complex":{"bar":123,"foo":["array",456]},"element":{"type":"div","key":null,"props":{"children":"Hi"},"_owner":null,"_store":{}}}
   </pre>
+  <div />
 </div>
 `;
