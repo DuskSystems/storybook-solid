@@ -61,24 +61,24 @@ function createSingleAttribute(key: string, value: unknown): JSXAttribute | null
     return null;
   }
 
-  if (typeof value === "boolean") {
-    if (value) {
-      return t.jsxAttribute(t.jsxIdentifier(key), null);
-    }
-
-    return null;
+  if (value === null) {
+    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.nullLiteral()));
   }
 
   if (typeof value === "string") {
     return t.jsxAttribute(t.jsxIdentifier(key), t.stringLiteral(value));
   }
 
-  if (value === null) {
-    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.nullLiteral()));
-  }
-
   if (typeof value === "number") {
     return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.numericLiteral(value)));
+  }
+
+  if (typeof value === "boolean") {
+    if (value) {
+      return t.jsxAttribute(t.jsxIdentifier(key), null);
+    }
+
+    return null;
   }
 
   if (typeof value === "function") {
