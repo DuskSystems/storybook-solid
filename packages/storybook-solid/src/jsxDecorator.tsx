@@ -59,17 +59,15 @@ export const jsxDecorator = (storyFn: PartialStoryFn<SolidRenderer>, context: St
 };
 
 function extractComponentName(component: Component | undefined): string {
-  console.log("Component: ", component);
-
-  const name = component?.name?.replace("[solid-refresh]", "") || null;
-  if (name && name !== "C") {
-    return name;
-  }
-
   // biome-ignore lint/suspicious/noExplicitAny: Best effort.
   const displayName = (component as any).displayName;
   if (typeof displayName === "string") {
     return displayName;
+  }
+
+  const name = component?.name?.replace("[solid-refresh]", "") || null;
+  if (name) {
+    return name;
   }
 
   logger.warn("Failed to extract component name: ", component);
