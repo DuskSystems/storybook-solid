@@ -16,9 +16,15 @@ describe("jsxGenerator", () => {
         nested: ["nested", ["array", 456]],
         object: { foo: "bar", baz: false },
         complex: { bar: 123, foo: ["array", 456] },
-        function: (x: number) => x * 2,
+        function: function power(x: number) {
+          return x * x;
+        },
+        arrow: (x: number) => x * 2,
         call: Math.max(1, 2),
         component: <div>Hi</div>,
+        symbol: Symbol("foo"),
+        big_number: BigInt(123456),
+        solid: <Show when={() => true}>Inner Value</Show>,
       },
       null,
     );
@@ -26,22 +32,25 @@ describe("jsxGenerator", () => {
     expect(result).toMatchInlineSnapshot(`
       "<MyComponent
         array={[1, 2, 3]}
+        arrow={() => {}}
+        big_number={123456n}
         boolTrue
         call={2}
         complex={{
           bar: 123,
           foo: ["array", 456],
         }}
-        component={{}}
-        function={(x) => x * 2}
+        component={<div>Hi</div>}
+        function={() => {}}
         nested={["nested", ["array", 456]]}
-        null={null}
         number={42}
         object={{
           foo: "bar",
           baz: false,
         }}
+        solid={() => {}}
         string="hello"
+        symbol="Symbol(foo)"
       />"
     `);
   });

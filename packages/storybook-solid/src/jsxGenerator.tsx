@@ -6,12 +6,7 @@ import { logger } from "storybook/internal/client-logger";
 
 const t = Babel.packages.types;
 const generate = Babel.packages.generator.default;
-const { parse } = Babel.packages.parser;
-
-type JSXAttribute = ReturnType<typeof t.jsxAttribute>;
-type JSXElement = ReturnType<typeof t.jsxElement>;
-type JSXExpressionContainer = ReturnType<typeof t.jsxExpressionContainer>;
-type JSXText = ReturnType<typeof t.jsxText>;
+const { parseExpression } = Babel.packages.parser;
 
 export async function jsxGenerator(
   name: string,
@@ -31,7 +26,7 @@ export async function jsxGenerator(
   return formatted.trim().replace(/;$/, "");
 }
 
-function createJSXElement(name: string, attributes: Record<string, unknown>, children: unknown): JSXElement {
+function createJSXElement(name: string, attributes: Record<string, unknown>, children: unknown) {
   const jsxAttributes = createJSXAttributes(attributes);
   const jsxChildren = createJSXChildren(children);
   const hasChildren = jsxChildren.length > 0;
@@ -43,7 +38,7 @@ function createJSXElement(name: string, attributes: Record<string, unknown>, chi
   );
 }
 
-function createJSXAttributes(attributes: Record<string, unknown>): JSXAttribute[] {
+function createJSXAttributes(attributes: Record<string, unknown>) {
   const result = [];
 
   const sorted = Object.entries(attributes).sort(([a], [b]) => a.localeCompare(b));
@@ -57,38 +52,9 @@ function createJSXAttributes(attributes: Record<string, unknown>): JSXAttribute[
   return result;
 }
 
-function createSingleAttribute(key: string, value: unknown): JSXAttribute | null {
-  if (value === undefined) {
-    return null;
-  }
-
+function createSingleAttribute(key: string, value: unknown) {
   if (value === null) {
-    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.nullLiteral()));
-  }
-
-  if (typeof value === "string") {
-    return t.jsxAttribute(t.jsxIdentifier(key), t.stringLiteral(value));
-  }
-
-  if (typeof value === "number") {
-    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.numericLiteral(value)));
-  }
-
-  if (typeof value === "boolean") {
-    if (value) {
-      return t.jsxAttribute(t.jsxIdentifier(key), null);
-    }
-
     return null;
-  }
-
-  if (typeof value === "function") {
-    const ast = parse(value.toString());
-
-    // @ts-expect-error: TODO
-    const expression = ast.program.body[0].expression;
-
-    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(expression));
   }
 
   if (Array.isArray(value)) {
@@ -98,19 +64,65 @@ function createSingleAttribute(key: string, value: unknown): JSXAttribute | null
     );
   }
 
-  if (typeof value === "object") {
-    const properties = Object.entries(value).map(([propKey, propValue]) => {
-      return t.objectProperty(t.identifier(propKey), valueToNode(propValue));
-    });
+  switch (typeof value) {
+    case "undefined": {
+      return null;
+    }
 
-    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.objectExpression(properties)));
+    case "symbol": {
+      return t.jsxAttribute(t.jsxIdentifier(key), t.stringLiteral(value.toString()));
+    }
+
+    case "string": {
+      return t.jsxAttribute(t.jsxIdentifier(key), t.stringLiteral(value));
+    }
+
+    case "bigint": {
+      return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.bigIntLiteral(value.toString())));
+    }
+
+    case "number": {
+      return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.numericLiteral(value)));
+    }
+
+    case "boolean": {
+      if (value) {
+        return t.jsxAttribute(t.jsxIdentifier(key), null);
+      }
+
+      return null;
+    }
+
+    case "function": {
+      return t.jsxAttribute(
+        t.jsxIdentifier(key),
+        t.jsxExpressionContainer(t.arrowFunctionExpression([], t.blockStatement([]))),
+      );
+    }
+
+    case "object": {
+      if (value instanceof HTMLElement) {
+        const expression = parseExpression(value.outerHTML, {
+          plugins: ["jsx"],
+        });
+
+        return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(expression));
+      }
+
+      const properties = Object.entries(value).map(([propKey, propValue]) => {
+        return t.objectProperty(t.identifier(propKey), valueToNode(propValue));
+      });
+
+      return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.objectExpression(properties)));
+    }
+
+    default: {
+      throw new Error("Unreachable");
+    }
   }
-
-  logger.warn(`Skipping attribute "${key}" with unsupported value type: ${typeof value}`);
-  return null;
 }
 
-function createJSXChildren(children: unknown): (JSXText | JSXExpressionContainer)[] {
+function createJSXChildren(children: unknown) {
   if (!children) {
     return [];
   }
