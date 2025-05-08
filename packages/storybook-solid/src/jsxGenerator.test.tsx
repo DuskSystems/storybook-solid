@@ -33,7 +33,7 @@ describe("jsxGenerator", () => {
           foo: ["array", 456],
         }}
         component={{}}
-        function={() => {}}
+        function={(x) => x * 2}
         nested={["nested", ["array", 456]]}
         null={null}
         number={42}

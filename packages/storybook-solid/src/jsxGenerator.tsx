@@ -6,6 +6,7 @@ import { logger } from "storybook/internal/client-logger";
 
 const t = Babel.packages.types;
 const generate = Babel.packages.generator.default;
+const { parse } = Babel.packages.parser;
 
 type JSXAttribute = ReturnType<typeof t.jsxAttribute>;
 type JSXElement = ReturnType<typeof t.jsxElement>;
@@ -82,10 +83,12 @@ function createSingleAttribute(key: string, value: unknown): JSXAttribute | null
   }
 
   if (typeof value === "function") {
-    return t.jsxAttribute(
-      t.jsxIdentifier(key),
-      t.jsxExpressionContainer(t.arrowFunctionExpression([], t.blockStatement([]))),
-    );
+    const ast = parse(value.toString());
+
+    // @ts-expect-error: TODO
+    const expression = ast.program.body[0].expression;
+
+    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(expression));
   }
 
   if (Array.isArray(value)) {
@@ -163,5 +166,6 @@ function valueToNode(value: unknown): any {
     return t.objectExpression(properties);
   }
 
-  return t.nullLiteral();
+  logger.warn(`Skipping value "${value}" with unsupported type: ${typeof value}`);
+  return null;
 }
