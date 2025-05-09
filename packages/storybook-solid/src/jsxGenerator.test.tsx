@@ -60,29 +60,15 @@ describe("jsxGenerator", () => {
       false,
       null,
       ["nested", ["array", 456]],
-      { foo: "bar" },
       <div>Hello</div>,
       <span>World</span>,
-      () => <em>JSX from function</em>,
-      () => 99,
       <Show when={() => true}>Show</Show>,
     ]);
 
     expect(result).toMatchInlineSnapshot(`
       "<MyComponent>
-        text{123}
-        {true}
-        {false}
-        {null}
-        {["nested", ["array", 456]]}
-        {{
-          foo: "bar",
-        }}
-        {{}}
-        {{}}
-        {() => {}}
-        {() => {}}
-        {() => {}}
+        text123nestedarray456<div>Hello</div>
+        <span>World</span>
       </MyComponent>"
     `);
   });

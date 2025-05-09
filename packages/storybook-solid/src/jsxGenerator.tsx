@@ -1,3 +1,5 @@
+// biome-ignore-all lint/suspicious/noExplicitAny: Best effort parsing.
+
 import * as Babel from "@babel/standalone";
 import prettierPluginBabel from "prettier/plugins/babel";
 import prettierPluginEstree from "prettier/plugins/estree";
@@ -17,7 +19,7 @@ export async function jsxGenerator(
   const { code } = generate(element);
 
   const formatted = await format(code, {
-    parser: "babel",
+    parser: "babel-ts",
     plugins: [prettierPluginBabel, prettierPluginEstree],
     printWidth: 120,
     singleAttributePerLine: true,
@@ -26,7 +28,7 @@ export async function jsxGenerator(
   return formatted.trim().replace(/;$/, "");
 }
 
-function createJSXElement(name: string, attributes: Record<string, unknown>, children: unknown) {
+function createJSXElement(name: string, attributes: Record<string, unknown>, children: unknown): any {
   const jsxAttributes = createJSXAttributes(attributes);
   const jsxChildren = createJSXChildren(children);
   const hasChildren = jsxChildren.length > 0;
@@ -38,35 +40,64 @@ function createJSXElement(name: string, attributes: Record<string, unknown>, chi
   );
 }
 
-function createJSXAttributes(attributes: Record<string, unknown>) {
+function createJSXAttributes(attributes: Record<string, unknown>): any[] {
   const result = [];
-
   const sorted = Object.entries(attributes).sort(([a], [b]) => a.localeCompare(b));
+
   for (const [key, value] of sorted) {
-    const attribute = createSingleAttribute(key, value);
-    if (attribute) {
-      result.push(attribute);
+    if (value === undefined) {
+      continue;
+    }
+
+    if (typeof value === "boolean") {
+      if (value) {
+        result.push(t.jsxAttribute(t.jsxIdentifier(key), null));
+      }
+
+      continue;
+    }
+
+    const parsed = parseAttributeValue(value, true);
+    if (parsed) {
+      result.push(t.jsxAttribute(t.jsxIdentifier(key), parsed));
     }
   }
 
   return result;
 }
 
-function createSingleAttribute(key: string, value: unknown) {
-  if (value === null) {
-    return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.nullLiteral()));
+function parseAttributeValue(value: unknown, root: boolean): any {
+  if (value === null || value === undefined) {
+    return root ? t.jsxExpressionContainer(t.nullLiteral()) : t.nullLiteral();
   }
 
   if (Array.isArray(value)) {
-    return t.jsxAttribute(
-      t.jsxIdentifier(key),
-      t.jsxExpressionContainer(t.arrayExpression(value.map((item) => valueToNode(item)))),
-    );
+    const expression = t.arrayExpression(value.map((item) => parseAttributeValue(item, false)));
+    return root ? t.jsxExpressionContainer(expression) : expression;
   }
 
   switch (typeof value) {
-    case "undefined": {
-      return null;
+    case "string":
+      return t.stringLiteral(value);
+
+    case "number": {
+      const expression = t.numericLiteral(value);
+      return root ? t.jsxExpressionContainer(expression) : expression;
+    }
+
+    case "boolean": {
+      const expression = t.booleanLiteral(value);
+      return root ? t.jsxExpressionContainer(expression) : expression;
+    }
+
+    case "bigint": {
+      const expression = t.bigIntLiteral(value.toString());
+      return root ? t.jsxExpressionContainer(expression) : expression;
+    }
+
+    case "function": {
+      const expression = t.arrowFunctionExpression([], t.blockStatement([]));
+      return root ? t.jsxExpressionContainer(expression) : expression;
     }
 
     case "symbol": {
@@ -74,59 +105,31 @@ function createSingleAttribute(key: string, value: unknown) {
         ? t.callExpression(t.identifier("Symbol"), [t.stringLiteral(value.description)])
         : t.callExpression(t.identifier("Symbol"), []);
 
-      return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(expression));
-    }
-
-    case "string": {
-      return t.jsxAttribute(t.jsxIdentifier(key), t.stringLiteral(value));
-    }
-
-    case "bigint": {
-      return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.bigIntLiteral(value.toString())));
-    }
-
-    case "number": {
-      return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.numericLiteral(value)));
-    }
-
-    case "boolean": {
-      if (value) {
-        return t.jsxAttribute(t.jsxIdentifier(key), null);
-      }
-
-      return null;
-    }
-
-    case "function": {
-      return t.jsxAttribute(
-        t.jsxIdentifier(key),
-        t.jsxExpressionContainer(t.arrowFunctionExpression([], t.blockStatement([]))),
-      );
+      return root ? t.jsxExpressionContainer(expression) : expression;
     }
 
     case "object": {
       if (value instanceof HTMLElement) {
-        const expression = parseExpression(value.outerHTML, {
-          plugins: ["jsx"],
-        });
-
-        return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(expression));
+        const expression = parseExpression(value.outerHTML, { plugins: ["jsx"] });
+        return root ? t.jsxExpressionContainer(expression) : expression;
       }
 
-      const properties = Object.entries(value).map(([propKey, propValue]) => {
-        return t.objectProperty(t.identifier(propKey), valueToNode(propValue));
-      });
+      const properties = [];
+      for (const [propKey, propValue] of Object.entries(value)) {
+        properties.push(t.objectProperty(t.identifier(propKey), parseAttributeValue(propValue, false)));
+      }
 
-      return t.jsxAttribute(t.jsxIdentifier(key), t.jsxExpressionContainer(t.objectExpression(properties)));
+      const expression = t.objectExpression(properties);
+      return root ? t.jsxExpressionContainer(expression) : expression;
     }
 
-    default: {
-      throw new Error("Unreachable");
-    }
+    default:
+      logger.warn(`Skipping value "${value}" with unsupported type: ${typeof value}`);
+      return root ? null : t.nullLiteral();
   }
 }
 
-function createJSXChildren(children: unknown) {
+function createJSXChildren(children: unknown): any[] {
   if (!children) {
     return [];
   }
@@ -135,53 +138,105 @@ function createJSXChildren(children: unknown) {
     return [t.jsxText(children)];
   }
 
+  if (children instanceof HTMLElement) {
+    const expression = parseExpression(children.outerHTML, { plugins: ["jsx"] });
+    return [expression];
+  }
+
   if (Array.isArray(children)) {
-    return children.map((child) => {
+    const result = [];
+    for (const child of children) {
       if (typeof child === "string") {
-        return t.jsxText(child);
+        result.push(t.jsxText(child));
+        continue;
       }
 
-      return t.jsxExpressionContainer(valueToNode(child));
-    });
+      if (child === null || child === undefined || typeof child === "boolean") {
+        continue;
+      }
+
+      if (typeof child === "number") {
+        result.push(t.jsxText(String(child)));
+        continue;
+      }
+
+      if (Array.isArray(child)) {
+        const nested = createJSXChildren(child);
+        result.push(...nested);
+        continue;
+      }
+
+      if (child instanceof HTMLElement) {
+        result.push(parseExpression(child.outerHTML, { plugins: ["jsx"] }));
+        continue;
+      }
+
+      const parsed = parseChild(child);
+      if (parsed) {
+        result.push(t.jsxExpressionContainer(parsed));
+      }
+    }
+
+    return result;
   }
 
-  return [t.jsxExpressionContainer(valueToNode(children))];
+  const parsed = parseChild(children);
+  if (parsed) {
+    return [t.jsxExpressionContainer(parsed)];
+  }
+
+  return [];
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: Best effort.
-function valueToNode(value: unknown): any {
+function parseChild(value: unknown): any {
   if (value === null || value === undefined) {
-    return t.nullLiteral();
-  }
-
-  if (typeof value === "string") {
-    return t.stringLiteral(value);
-  }
-
-  if (typeof value === "number") {
-    return t.numericLiteral(value);
-  }
-
-  if (typeof value === "boolean") {
-    return t.booleanLiteral(value);
-  }
-
-  if (typeof value === "function") {
-    return t.arrowFunctionExpression([], t.blockStatement([]));
+    return null;
   }
 
   if (Array.isArray(value)) {
-    return t.arrayExpression(value.map((item) => valueToNode(item)));
+    const items = value.map((item) => parseChild(item)).filter(Boolean);
+    if (items.length > 0) {
+      return t.arrayExpression(items);
+    }
+
+    return null;
   }
 
-  if (typeof value === "object") {
-    const properties = Object.entries(value).map(([propKey, propValue]) => {
-      return t.objectProperty(t.identifier(propKey), valueToNode(propValue));
-    });
+  switch (typeof value) {
+    case "string":
+      return t.stringLiteral(value);
 
-    return t.objectExpression(properties);
+    case "number":
+      return t.stringLiteral(value.toString());
+
+    case "boolean":
+      return null;
+
+    case "function":
+      return null;
+
+    case "object": {
+      if (value instanceof HTMLElement) {
+        return parseExpression(value.outerHTML, { plugins: ["jsx"] });
+      }
+
+      const properties = [];
+      for (const [propKey, propValue] of Object.entries(value)) {
+        const parsed = parseChild(propValue);
+        if (parsed) {
+          properties.push(t.objectProperty(t.identifier(propKey), parsed));
+        }
+      }
+
+      if (properties.length > 0) {
+        return t.objectExpression(properties);
+      }
+
+      return null;
+    }
+
+    default:
+      logger.warn(`Skipping value "${value}" with unsupported type: ${typeof value}`);
+      return null;
   }
-
-  logger.warn(`Skipping value "${value}" with unsupported type: ${typeof value}`);
-  return null;
 }
